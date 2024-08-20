@@ -1,0 +1,29 @@
+[project]
+name = "hexapawn"
+version = "0.0.1"
+authors = [
+  { name="Florian Ehmann" },
+]
+description = "Python Hexapawn library for playing and move generation"
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: Other/Proprietary License",
+    "Operating System :: OS Independent",
+]
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pylint", "pytest"]
+
+[project.urls]
+Homepage = "https://github.com/florianehmann/hexapawn"
+Issues = "https://github.com/florianehmann/hexapawn/issues"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.pylint]
+max-line-length = 120
