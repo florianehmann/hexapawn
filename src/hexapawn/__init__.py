@@ -47,17 +47,17 @@ class Squares(Enum):
 
         return new_coords
 
-    def capture_candidates(self, player_color: Color) -> list[Self]:
+    def capture_candidates(self, player_color: Color) -> set[Self]:
         """Gets the squares that a pawn could capture at, given its `player_color`,
         if there is an opponent pawn on the target square."""
         if (rank_advanced_coords := self._advance_rank(self.value, player_color)) is None:
-            return []
+            return set()
 
         candidate_coords = [coords for left in [True, False]
                             if (coords := self._change_file(rank_advanced_coords, left))]
         assert len(candidate_coords) > 0, "There is always at least a file to the left or right"
 
-        return [self.__class__(coords) for coords in candidate_coords]
+        return {self.__class__(coords) for coords in candidate_coords}
 
 
 class Board:
@@ -72,11 +72,10 @@ class Board:
         self.turn: Color = WHITE
         """Indicates which player does the next move"""
 
-        self.reset()
+        self.clear().reset()
 
     def clear(self) -> Self:
         """Removes all pieces from the board"""
-        self._board = [[None for _ in range(3)] for _ in range(3)]
         for i, j in product(range(len(self._board)), range(len(self._board[0]))):
             self._board[i][j] = None
 
@@ -97,13 +96,13 @@ class Board:
         return self
 
     def legal_moves(self):
-        pass
+        """Legal moves from the current position and for the player whose turn it is."""
 
     def to_unicode(self) -> str:
         """Returns a Unicode symbol representation of the state of the board"""
         result = ""
         for rank in range(len(self._board[0])):
-            for file in range(len(self._board)):
+            for file in range(len(self._board)):  # pylint: disable=consider-using-enumerate
                 entry = self._board[file][rank]
                 if entry is not None:
                     result += "♙ " if entry == WHITE else "♟ "

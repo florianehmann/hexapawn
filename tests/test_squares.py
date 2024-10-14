@@ -46,3 +46,27 @@ class TestSquares:
     def test_advance_rank_edge(self, source_square: Squares, player_color: Color):
         """Test if we get None if we try to advance off the board's edge"""
         assert Squares._advance_rank(source_square.value, player_color) is None
+
+    @pytest.mark.parametrize("player_color, starting_square, candidates", [
+        (WHITE, Squares.A1, {Squares.B2}),
+        (WHITE, Squares.A2, {Squares.B3}),
+        (WHITE, Squares.A3, set()),
+        (WHITE, Squares.B1, {Squares.A2, Squares.C2}),
+        (WHITE, Squares.B2, {Squares.A3, Squares.C3}),
+        (WHITE, Squares.B3, set()),
+        (WHITE, Squares.C1, {Squares.B2}),
+        (WHITE, Squares.C2, {Squares.B3}),
+        (WHITE, Squares.C3, set()),
+        (BLACK, Squares.A1, set()),
+        (BLACK, Squares.A2, {Squares.B1}),
+        (BLACK, Squares.A3, {Squares.B2}),
+        (BLACK, Squares.B1, set()),
+        (BLACK, Squares.B2, {Squares.A1, Squares.C1}),
+        (BLACK, Squares.B3, {Squares.A2, Squares.C2}),
+        (BLACK, Squares.C1, set()),
+        (BLACK, Squares.C2, {Squares.B1}),
+        (BLACK, Squares.C3, {Squares.B2}),
+    ])
+    def test_capture_candidates(self, player_color: Color, starting_square: Squares, candidates: set[Squares]):
+        """Test if we get the right capture candidates"""
+        assert starting_square.capture_candidates(player_color) == candidates
