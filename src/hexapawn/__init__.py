@@ -1,7 +1,9 @@
 """Python Hexapawn library for playing and move generation"""
 
+from dataclasses import dataclass
 from enum import Enum
 from itertools import product
+import re
 from typing import Optional, TypeAlias, Self
 
 Color: TypeAlias = bool
@@ -58,6 +60,34 @@ class Squares(Enum):
         assert len(candidate_coords) > 0, "There is always at least a file to the left or right"
 
         return {self.__class__(coords) for coords in candidate_coords}
+
+
+@dataclass
+class Move:
+    """Move of a pawn from a square to another square"""
+
+    from_square: Squares
+    """Source square of the move"""
+
+    to_square: Squares
+    """Target square of the move"""
+
+    @classmethod
+    def from_uci(cls, uci: str) -> Self:
+        """Creates a move from a UCI string"""
+        pattern = "([abc][1-3])([abc][1-3])"
+        match = re.match(pattern, uci.lower().strip())
+
+        if not match:
+            raise ValueError(f"Invalid UCI string '{uci}'")
+
+        from_uci = match.group(1)
+        to_uci = match.group(2)
+
+        return cls(
+            from_square=Squares[from_uci.upper()],
+            to_square=Squares[to_uci.upper()],
+        )
 
 
 class Board:
