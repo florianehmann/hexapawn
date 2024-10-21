@@ -47,6 +47,20 @@ class TestSquares:
         """Test if we get None if we try to advance off the board's edge"""
         assert Squares._advance_rank(source_square.value, player_color) is None
 
+    @pytest.mark.parametrize("player_color, source_square, target_square, expected", (
+        (WHITE, Squares.B1, Squares.B2, True),
+        (WHITE, Squares.B1, Squares.C2, False),
+        (WHITE, Squares.B1, Squares.C1, False),
+        (WHITE, Squares.B2, Squares.B3, True),
+        (BLACK, Squares.B3, Squares.B2, True),
+        (BLACK, Squares.B3, Squares.C2, False),
+        (BLACK, Squares.B3, Squares.C3, False),
+        (BLACK, Squares.B2, Squares.B1, True)
+    ))
+    def test_can_advance_to(self, player_color: Color, source_square: Squares, target_square: Squares, expected: bool):
+        """Checks if `Squares` properly determines which moves are regular advances."""
+        assert source_square.can_advance_to(target_square, player_color) == expected
+
     @pytest.mark.parametrize("player_color, starting_square, candidates", [
         (WHITE, Squares.A1, {Squares.B2}),
         (WHITE, Squares.A2, {Squares.B3}),

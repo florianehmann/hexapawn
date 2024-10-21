@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from enum import Enum
 from itertools import product
 import re
-from typing import Optional, TypeAlias, Self
+from typing import Iterator, Optional, TypeAlias, Self
 
 Color: TypeAlias = bool
 WHITE: Color = True
@@ -48,6 +48,18 @@ class Squares(Enum):
             return None
 
         return new_coords
+
+    def can_advance_to(self, target_square: Self, player_color: Color) -> bool:
+        """Checks if the player of `player_color` could advance a piece from the current square to `target_square` in a
+        non-capturing move."""
+        source_file, source_rank = self.value
+        target_file, target_rank = target_square.value
+
+        if source_file != target_file:
+            return False
+
+        delta_rank = +1 if player_color == WHITE else -1
+        return source_rank + delta_rank == target_rank
 
     def capture_candidates(self, player_color: Color) -> set[Self]:
         """Gets the squares that a pawn could capture at, given its `player_color`,
@@ -125,8 +137,43 @@ class Board:
 
         return self
 
-    def legal_moves(self):
+    @property
+    def legal_moves(self) -> Iterator[Move]:
+        """Iterator of legal moves in the current state.
+
+        Wraps :meth:`generate_legal_moves` and :meth:`is_legal`"""
+        return self.generate_legal_moves()
+
+    def generate_legal_moves(self) -> Iterator[Move]:
         """Legal moves from the current position and for the player whose turn it is."""
+        return (
+            move for from_square, to_square in product(Squares, Squares)
+            if self.is_legal(move := Move(from_square, to_square))
+        )
+
+    def is_legal(self, move: Move) -> bool:
+        """Checks if the given `move` is legal in the current state of the game"""
+
+        # no piece at the source square
+        if not self.piece_at(move.from_square) == self.turn:
+            return False
+
+        # normal advance
+        if move.from_square.can_advance_to(move.to_square, self.turn):
+            if not self.piece_at(move.to_square):
+                return True
+
+        # capture move
+        if move.to_square in move.from_square.capture_candidates(self.turn):
+            if self.piece_at(move.to_square) == ~self.turn:
+                return True
+
+        return False
+
+    def piece_at(self, square: Squares) -> Color | None:
+        """Returns the `Color` of the piece th the given `square` or `None` if the square is not occupied."""
+        file, rank = square.value
+        return self._board[file][rank]
 
     def to_unicode(self) -> str:
         """Returns a Unicode symbol representation of the state of the board"""
